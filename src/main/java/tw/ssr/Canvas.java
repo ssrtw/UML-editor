@@ -111,8 +111,10 @@ public class Canvas extends JPanel {
                 isDragging = true;
                 clearSelected();
                 currPos.setVec(e);
+                Vector leftTop = Vector.minPoint(startPos, currPos);
+                Vector rightDown = Vector.maxPoint(startPos, currPos);
                 for (Object2D obj : scene.getChildren()) {
-                    if (obj.intersect(startPos, currPos)) {
+                    if (obj.intersect(leftTop, rightDown)) {
                         obj.setSelect(true);
                     } else {
                         obj.setSelect(false);
@@ -129,10 +131,11 @@ public class Canvas extends JPanel {
     public void paint(Graphics g) {
         super.paint(g);
         scene.render(g);
-        Vector size = currPos.clone().sub(startPos);
         if (isDragging) {
-            g.setColor(new Color(0, 0, 192, 128));
-            g.fillRect(startPos.getX(), startPos.getY(), size.getX(), size.getY());
+            Vector leftTop = Vector.minPoint(startPos, currPos);
+            Vector size = startPos.clone().sub(currPos).abs();
+            g.setColor(new Color(0, 128, 192, 128));
+            g.fillRect(leftTop.getX(), leftTop.getY(), size.getX(), size.getY());
         }
     }
 }

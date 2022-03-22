@@ -30,8 +30,8 @@ public class Vector {
     }
 
     public void setVec(Vector v) {
-        this.x = x;
-        this.y = y;
+        this.x = v.x;
+        this.y = v.y;
     }
 
     public int getX() {
@@ -47,8 +47,8 @@ public class Vector {
     }
 
     public Vector add(Vector other) {
-        x += other.x;
-        y += other.y;
+        this.x += other.x;
+        this.y += other.y;
         return this;
     }
 
@@ -59,8 +59,8 @@ public class Vector {
     }
 
     public Vector sub(Vector other) {
-        x -= other.x;
-        y -= other.y;
+        this.x -= other.x;
+        this.y -= other.y;
         return this;
     }
 
@@ -68,5 +68,31 @@ public class Vector {
         this.x -= x;
         this.y -= y;
         return this;
+    }
+
+    public Vector abs() {
+        this.x = Math.abs(x);
+        this.y = Math.abs(y);
+        return this;
+    }
+
+    public static Vector minPoint(Vector p, Vector q) {
+        Vector res = new Vector();
+        res.setVec(Math.min(p.x, q.x), Math.min(p.y, q.y));
+        return res;
+    }
+
+    public static Vector maxPoint(Vector p, Vector q) {
+        Vector res = new Vector();
+        res.setVec(Math.max(p.x, q.x), Math.max(p.y, q.y));
+        return res;
+    }
+
+    @Override
+    public String toString() {
+        return "Vector{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }
