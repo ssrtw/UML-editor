@@ -3,7 +3,7 @@ package tw.ssr.Object;
 import java.awt.*;
 
 public class UseCaseObject extends Object2D {
-    private static int width = 120, height = 80;
+    private static final int width = 120, height = 80;
 
     public UseCaseObject() {
         super();
@@ -16,6 +16,7 @@ public class UseCaseObject extends Object2D {
 
     @Override
     public void render(Graphics g) {
+        super.render(g);
         g.setColor(mat.fill);
         g.fillOval(pos.getX(), pos.getY(), size.x, size.y);
         Graphics2D g2 = (Graphics2D) g;
@@ -27,6 +28,16 @@ public class UseCaseObject extends Object2D {
         g2.drawOval(pos.getX(), pos.getY(), size.x, size.y);
         g.setColor(Color.BLACK);
         g.drawString(name, pos.x + 15, pos.y + 40);
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
 
     @Override

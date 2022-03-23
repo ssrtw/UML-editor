@@ -49,7 +49,7 @@ public class Canvas extends JPanel {
         public void mouseReleased(MouseEvent e) {
             super.mouseReleased(e);
             isDragging = false;
-            if (e.getButton() == MouseEvent.BUTTON1) {
+            if (SwingUtilities.isLeftMouseButton(e)) {
                 if (canvas.getUe().getMode() == Mode.CREATE_CLASS) {
                     scene.getChildren().add(new ClassObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
                 } else if (canvas.getUe().getMode() == Mode.CREATE_USECASE) {
@@ -87,43 +87,47 @@ public class Canvas extends JPanel {
         public void mousePressed(MouseEvent e) {
             super.mousePressed(e);
             clearSelected();
-            if (e.getButton() == MouseEvent.BUTTON1 && canvas.getUe().getMode() == Mode.SELECT) {
-                startPos.setVec(e);
-                rayCasting();
-            } else {
-                isDragging = false;
-                signleSelect = false;
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                if (canvas.getUe().getMode() == Mode.SELECT) {
+                    startPos.setVec(e);
+                    rayCasting();
+                } else {
+                    isDragging = false;
+                    signleSelect = false;
+                }
+                repaint();
             }
-            repaint();
         }
 
         @Override
         public void mouseDragged(MouseEvent e) {
             super.mouseDragged(e);
-            if (canvas.getUe().getMode() == Mode.SELECT) {
-                if (signleSelect) {
-                    isDragging = false;
-                    int mx = e.getX() - startPos.getX();
-                    int my = e.getY() - startPos.getY();
-                    selected.get(0).move(mx, my);
-                    startPos.setVec(e);
-                    repaint();
-                    return;
-                }
-                // 圈選
-                isDragging = true;
-                clearSelected();
-                currPos.setVec(e);
-                Vector leftTop = Vector.minPoint(startPos, currPos);
-                Vector rightDown = Vector.maxPoint(startPos, currPos);
-                for (Object2D obj : scene.getChildren()) {
-                    if (obj.intersect(leftTop, rightDown)) {
-                        obj.setSelect(true);
-                    } else {
-                        obj.setSelect(false);
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                if (canvas.getUe().getMode() == Mode.SELECT) {
+                    if (signleSelect) {
+                        isDragging = false;
+                        int mx = e.getX() - startPos.getX();
+                        int my = e.getY() - startPos.getY();
+                        selected.get(0).move(mx, my);
+                        startPos.setVec(e);
+                        repaint();
+                        return;
                     }
+                    // 圈選
+                    isDragging = true;
+                    clearSelected();
+                    currPos.setVec(e);
+                    Vector leftTop = Vector.minPoint(startPos, currPos);
+                    Vector rightDown = Vector.maxPoint(startPos, currPos);
+                    for (Object2D obj : scene.getChildren()) {
+                        if (obj.intersect(leftTop, rightDown)) {
+                            obj.setSelect(true);
+                        } else {
+                            obj.setSelect(false);
+                        }
+                    }
+                    repaint();
                 }
-                repaint();
             }
         }
     }

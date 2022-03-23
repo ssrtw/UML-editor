@@ -3,6 +3,8 @@ package tw.ssr.Object;
 import java.awt.*;
 
 public class Group extends Object2D {
+    private int width, height;
+
     public Group() {
         super();
     }
@@ -12,6 +14,16 @@ public class Group extends Object2D {
         for (Object2D obj : children) {
             obj.render(g);
         }
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
 
     @Override

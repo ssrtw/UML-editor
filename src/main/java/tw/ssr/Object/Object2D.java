@@ -4,8 +4,8 @@ import java.awt.*;
 import java.util.ArrayList;
 
 abstract public class Object2D {
-    private static int portCnt = 4;
-    private static int zIndexNxt = 0;
+    protected static int portCnt = 4;
+    protected static int zIndexNxt = 0;
     protected int zIndex;
     protected Vector pos;
     protected Vector size;
@@ -52,7 +52,23 @@ abstract public class Object2D {
         return children;
     }
 
-    public abstract void render(Graphics g);
+    public abstract int getWidth();
+
+    public abstract int getHeight();
+
+    // Object2D help to draw port when selected
+    public void render(Graphics g) {
+        // draw port
+        if (selected) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setColor(Color.RED);
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRect(pos.x + getWidth() / 2 - 5, pos.y - 10, 10, 10); // top
+            g2.drawRect(pos.x + getWidth() / 2 - 5, pos.y + getHeight(), 10, 10); // down
+            g2.drawRect(pos.x - 10, pos.y + getHeight() / 2 - 5, 10, 10); // left
+            g2.drawRect(pos.x + getWidth(), pos.y + getHeight() / 2 - 5, 10, 10); // right
+        }
+    }
 
     public abstract boolean intersect(Vector mouse);
 
