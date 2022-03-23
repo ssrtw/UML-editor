@@ -90,6 +90,9 @@ public class Canvas extends JPanel {
             if (e.getButton() == MouseEvent.BUTTON1 && canvas.getUe().getMode() == Mode.SELECT) {
                 startPos.setVec(e);
                 rayCasting();
+            } else {
+                isDragging = false;
+                signleSelect = false;
             }
             repaint();
         }

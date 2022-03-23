@@ -8,6 +8,7 @@ enum Mode {
 }
 
 public class UMLEditor {
+    private static int minWidth = 1000, minHeight = 800;
     private JFrame mainFrame;
     private String[] btnName;
     private SideButton[] sideBarBtns;
@@ -20,7 +21,7 @@ public class UMLEditor {
 
     public UMLEditor() {
         mainFrame = new JFrame();
-        btnName = new String[] { "select", "association", "generalization", "composition", "class", "use case" };
+        btnName = new String[]{"select", "association", "generalization", "composition", "class", "use case"};
         sideBarBtns = new SideButton[btnName.length];
         canvas = new Canvas(this);
 
@@ -50,8 +51,8 @@ public class UMLEditor {
     }
 
     public void run() {
-        mainFrame.setSize(600, 600);
-        mainFrame.setMinimumSize(new Dimension(600, 600));
+        mainFrame.setSize(minWidth, minHeight);
+        mainFrame.setMinimumSize(new Dimension(minWidth, minHeight));
         mainFrame.setLayout(new GridBagLayout());
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -68,13 +69,12 @@ public class UMLEditor {
 
         GridBagConstraints sideBarConstraints = new GridBagConstraints();
         for (int i = 0; i < btnName.length; i++) {
-            sideBarBtns[i].setMinimumSize(new Dimension(200, 200));
             sideBarConstraints.gridx = 0;
             sideBarConstraints.gridy = i * 2;
             sideBarConstraints.gridwidth = 1;
             sideBarConstraints.gridheight = 2;
             sideBarConstraints.weighty = 1;
-            sideBarConstraints.fill = GridBagConstraints.HORIZONTAL;
+            sideBarConstraints.fill = GridBagConstraints.VERTICAL;
 
             mainFrame.add(sideBarBtns[i], sideBarConstraints);
         }
@@ -92,7 +92,7 @@ public class UMLEditor {
                 sideBarBtns[i].setBackground(Color.LIGHT_GRAY);
                 sideBarBtns[i].setForeground(Color.BLACK);
             } else {
-                sideBarBtns[i].setBackground(Color.BLACK);
+                sideBarBtns[i].setBackground(Color.GRAY);
                 sideBarBtns[i].setForeground(Color.WHITE);
             }
         }
