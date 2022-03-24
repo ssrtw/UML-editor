@@ -37,6 +37,16 @@ public class SideButton extends JButton {
         return mode;
     }
 
+    public void changeColor(Mode mode) {
+        if (this.mode == mode) {
+            setBackground(Color.GRAY);
+            setForeground(Color.WHITE);
+        } else {
+            setBackground(Color.LIGHT_GRAY);
+            setForeground(Color.BLACK);
+        }
+    }
+
     class SideButtonMouseAdapter extends MouseAdapter {
         public SideButtonMouseAdapter() {
             super();

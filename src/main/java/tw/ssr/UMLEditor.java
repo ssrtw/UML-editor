@@ -17,7 +17,7 @@ public class UMLEditor {
     private JMenuBar menuBar;
     private JMenu fileMenu;
     private JMenu editMenu;
-    private JMenuItem size;
+    private JMenuItem renameMenuItem, groupMenuItem, ungroupMenuItem;
 
     public UMLEditor() {
         mainFrame = new JFrame();
@@ -31,7 +31,9 @@ public class UMLEditor {
         menuBar = new JMenuBar();
         fileMenu = new JMenu("File");
         editMenu = new JMenu("Edit");
-        size = new JMenuItem("size");
+        renameMenuItem = new JMenuItem("Rename");
+        groupMenuItem = new JMenuItem("Group");
+        ungroupMenuItem = new JMenuItem("Ungroup");
     }
 
     public JFrame getMainJFrame() {
@@ -78,23 +80,32 @@ public class UMLEditor {
 
             mainFrame.add(sideBarBtns[i], sideBarConstraints);
         }
-        fileMenu.add(size);
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
+        editMenu.add(renameMenuItem);
+        renameMenuItem.addActionListener(e -> {
+            if (canvas.getSelected().size() == 1) {
+                String newName = JOptionPane.showInputDialog(mainFrame, "Input new name", "Rename", JOptionPane.INFORMATION_MESSAGE);
+                if (newName != null)
+                    canvas.renameSelected(newName);
+            }
+        });
+        editMenu.add(groupMenuItem);
+        groupMenuItem.addActionListener(e -> {
+            canvas.groupSelected();
+        });
+        editMenu.add(ungroupMenuItem);
+        ungroupMenuItem.addActionListener(e -> {
+            canvas.ungroupSelected();
+        });
         mainFrame.setJMenuBar(menuBar);
 
         mainFrame.setVisible(true);
     }
 
     public void setOtherBtnColor() {
-        for (int i = 0; i < sideBarBtns.length; i++) {
-            if (sideBarBtns[i].getMode() != mode) {
-                sideBarBtns[i].setBackground(Color.LIGHT_GRAY);
-                sideBarBtns[i].setForeground(Color.BLACK);
-            } else {
-                sideBarBtns[i].setBackground(Color.GRAY);
-                sideBarBtns[i].setForeground(Color.WHITE);
-            }
+        for (SideButton btn : sideBarBtns) {
+            btn.changeColor(mode);
         }
     }
 }

@@ -1,9 +1,9 @@
-package tw.ssr.Object;
+package tw.ssr;
 
 import java.awt.event.MouseEvent;
 
 public class Vector {
-    protected int x, y;
+    public int x, y;
 
     public Vector() {
         x = y = 0;
@@ -73,6 +73,16 @@ public class Vector {
     public Vector abs() {
         this.x = Math.abs(x);
         this.y = Math.abs(y);
+        return this;
+    }
+
+    public Vector setMin(Vector other) {
+        setVec(Math.min(x, other.x), Math.min(y, other.y));
+        return this;
+    }
+
+    public Vector setMax(Vector other) {
+        setVec(Math.max(x, other.x), Math.max(y, other.y));
         return this;
     }
 

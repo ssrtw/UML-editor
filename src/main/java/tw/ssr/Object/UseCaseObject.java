@@ -1,5 +1,7 @@
 package tw.ssr.Object;
 
+import tw.ssr.Vector;
+
 import java.awt.*;
 
 public class UseCaseObject extends Object2D {
@@ -17,27 +19,18 @@ public class UseCaseObject extends Object2D {
     @Override
     public void render(Graphics g) {
         super.render(g);
+        Vector position = sumParentPosition();
         g.setColor(mat.fill);
-        g.fillOval(pos.getX(), pos.getY(), size.x, size.y);
+        g.fillOval(position.getX(), position.getY(), size.x, size.y);
         Graphics2D g2 = (Graphics2D) g;
         if (selected)
             g2.setColor(Color.RED);
         else
             g2.setColor(mat.edge);
         g2.setStroke(new BasicStroke(4));
-        g2.drawOval(pos.getX(), pos.getY(), size.x, size.y);
+        g2.drawOval(position.getX(), position.getY(), size.x, size.y);
         g.setColor(Color.BLACK);
-        g.drawString(name, pos.x + 15, pos.y + 40);
-    }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public int getHeight() {
-        return height;
+        g.drawString(name, position.x + 15, position.y + 40);
     }
 
     @Override

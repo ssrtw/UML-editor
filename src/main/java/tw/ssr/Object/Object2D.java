@@ -1,5 +1,7 @@
 package tw.ssr.Object;
 
+import tw.ssr.Vector;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -14,6 +16,7 @@ abstract public class Object2D {
     protected Vector ports[];
     protected Object2D parent;
     protected boolean selected;
+    protected boolean isGroup;
     protected ArrayList<Object2D> children;
 
     public Object2D() {
@@ -24,8 +27,8 @@ abstract public class Object2D {
         name = new String();
         ports = new Vector[portCnt];
         parent = null;
+        isGroup = false;
         selected = false;
-        children = new ArrayList<>();
     }
 
     public Object2D(int x, int y, int w, int h, Object2D parent, Material mat) {
@@ -40,6 +43,10 @@ abstract public class Object2D {
         selected = isSelect;
     }
 
+    public boolean getIsGroup() {
+        return isGroup;
+    }
+
     public void move(int x, int y) {
         this.pos.setVec(pos.getX() + x, pos.getY() + y);
     }
@@ -52,9 +59,19 @@ abstract public class Object2D {
         return children;
     }
 
-    public abstract int getWidth();
+    public void setParent(Object2D parent) {
+        this.parent = parent;
+    }
 
-    public abstract int getHeight();
+    public Vector sumParentPosition() {
+        Vector position = pos.clone();
+        Object2D ancestor = parent;
+        while (ancestor != null) {
+            position.add(ancestor.pos);
+            ancestor = ancestor.parent;
+        }
+        return position;
+    }
 
     // Object2D help to draw port when selected
     public void render(Graphics g) {
@@ -63,14 +80,16 @@ abstract public class Object2D {
             Graphics2D g2 = (Graphics2D) g;
             g2.setColor(Color.RED);
             g2.setStroke(new BasicStroke(2));
-            g2.drawRect(pos.x + getWidth() / 2 - 5, pos.y - 10, 10, 10); // top
-            g2.drawRect(pos.x + getWidth() / 2 - 5, pos.y + getHeight(), 10, 10); // down
-            g2.drawRect(pos.x - 10, pos.y + getHeight() / 2 - 5, 10, 10); // left
-            g2.drawRect(pos.x + getWidth(), pos.y + getHeight() / 2 - 5, 10, 10); // right
+            g2.drawRect(pos.x + size.x / 2 - 5, pos.y - 10, 10, 10); // top
+            g2.drawRect(pos.x + size.x / 2 - 5, pos.y + size.y, 10, 10); // down
+            g2.drawRect(pos.x - 10, pos.y + size.y / 2 - 5, 10, 10); // left
+            g2.drawRect(pos.x + size.x, pos.y + size.y / 2 - 5, 10, 10); // right
         }
     }
 
-    public abstract boolean intersect(Vector mouse);
+    public boolean intersect(Vector mouse) {
+        return false;
+    }
 
     public boolean intersect(Vector v1, Vector v2) {
         // 完全包含

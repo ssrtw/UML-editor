@@ -13,14 +13,23 @@ public class Canvas extends JPanel {
     private UMLEditor ue;
     private ArrayList<Object2D> selected;
     private Vector startPos, currPos;
-    private boolean signleSelect;
+    private boolean singleSelect;
     private boolean isDragging;
 
     public Canvas() {
         super();
-        signleSelect = false;
+        singleSelect = false;
         isDragging = false;
-        scene = new Group();
+        // TODO: 先用override的，之後可能得重想這邊的繼承關係
+        // scene不應該畫出Group的邊界
+        scene = new Group() {
+            @Override
+            public void render(Graphics g) {
+                for (Object2D child : children) {
+                    child.render(g);
+                }
+            }
+        };
         selected = new ArrayList<>();
         startPos = new Vector();
         currPos = new Vector();
@@ -34,6 +43,43 @@ public class Canvas extends JPanel {
         this.ue = ue;
     }
 
+    public void renameSelected(String name) {
+        if (singleSelect) {
+            selected.get(0).setName(name);
+            repaint();
+        }
+    }
+
+    public void groupSelected() {
+        if (selected.size() > 1) {
+            Group group = new Group();
+            for (Object2D obj : selected) {
+                // 更改物件的父節點
+                group.getChildren().add(obj);
+                scene.getChildren().remove(obj);
+                // 移除select狀態
+                obj.setSelect(false);
+            }
+            group.grouping();
+            group.setParent(scene);
+            scene.getChildren().add(group);
+            selected.clear();
+        }
+        repaint();
+    }
+
+    public void ungroupSelected() {
+        if (singleSelect && selected.get(0).getIsGroup()) {
+            Group group = (Group) selected.get(0);
+            group.ungrouping();
+        }
+        repaint();
+    }
+
+    public ArrayList<Object2D> getSelected() {
+        return selected;
+    }
+
     public UMLEditor getUe() {
         return ue;
     }
@@ -45,23 +91,9 @@ public class Canvas extends JPanel {
             this.canvas = canvas;
         }
 
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            super.mouseReleased(e);
-            isDragging = false;
-            if (SwingUtilities.isLeftMouseButton(e)) {
-                if (canvas.getUe().getMode() == Mode.CREATE_CLASS) {
-                    scene.getChildren().add(new ClassObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
-                } else if (canvas.getUe().getMode() == Mode.CREATE_USECASE) {
-                    scene.getChildren().add(new UseCaseObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
-                }
-                repaint();
-            }
-        }
-
         private void clearSelected() {
             selected.clear();
-            signleSelect = false;
+            singleSelect = false;
             for (Object2D obj : scene.getChildren()) {
                 obj.setSelect(false);
             }
@@ -78,8 +110,22 @@ public class Canvas extends JPanel {
             }
             selected.add(intersectObj);
             if (intersectObj != null) {
-                signleSelect = true;
+                singleSelect = true;
                 intersectObj.setSelect(true);
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            super.mouseReleased(e);
+            isDragging = false;
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                if (canvas.getUe().getMode() == Mode.CREATE_CLASS) {
+                    scene.getChildren().add(new ClassObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
+                } else if (canvas.getUe().getMode() == Mode.CREATE_USECASE) {
+                    scene.getChildren().add(new UseCaseObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
+                }
+                repaint();
             }
         }
 
@@ -93,7 +139,7 @@ public class Canvas extends JPanel {
                     rayCasting();
                 } else {
                     isDragging = false;
-                    signleSelect = false;
+                    singleSelect = false;
                 }
                 repaint();
             }
@@ -104,7 +150,7 @@ public class Canvas extends JPanel {
             super.mouseDragged(e);
             if (SwingUtilities.isLeftMouseButton(e)) {
                 if (canvas.getUe().getMode() == Mode.SELECT) {
-                    if (signleSelect) {
+                    if (singleSelect) {
                         isDragging = false;
                         int mx = e.getX() - startPos.getX();
                         int my = e.getY() - startPos.getY();
@@ -113,6 +159,7 @@ public class Canvas extends JPanel {
                         repaint();
                         return;
                     }
+                    selected.clear();
                     // 圈選
                     isDragging = true;
                     clearSelected();
@@ -122,6 +169,7 @@ public class Canvas extends JPanel {
                     for (Object2D obj : scene.getChildren()) {
                         if (obj.intersect(leftTop, rightDown)) {
                             obj.setSelect(true);
+                            selected.add(obj);
                         } else {
                             obj.setSelect(false);
                         }

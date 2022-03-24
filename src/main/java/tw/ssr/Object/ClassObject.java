@@ -1,5 +1,7 @@
 package tw.ssr.Object;
 
+import tw.ssr.Vector;
+
 import java.awt.*;
 
 public class ClassObject extends Object2D {
@@ -17,7 +19,7 @@ public class ClassObject extends Object2D {
     @Override
     public void render(Graphics g) {
         super.render(g);
-        Vector position = parent.pos.clone().add(pos);
+        Vector position = sumParentPosition();
         g.setColor(mat.fill);
         g.fillRect(position.x, position.y, size.x, size.y);
         Graphics2D g2 = (Graphics2D) g;
@@ -37,20 +39,8 @@ public class ClassObject extends Object2D {
     }
 
     @Override
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public int getHeight() {
-        return height;
-    }
-
-    @Override
     public boolean intersect(Vector mouse) {
         Vector position = parent.pos.clone().add(pos);
-        if (mouse.x >= position.x && mouse.x <= position.x + size.x && mouse.y >= position.y && mouse.y <= position.y + size.y)
-            return true;
-        return false;
+        return mouse.x >= position.x && mouse.x <= position.x + size.x && mouse.y >= position.y && mouse.y <= position.y + size.y;
     }
 }

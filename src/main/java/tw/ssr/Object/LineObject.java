@@ -1,5 +1,7 @@
 package tw.ssr.Object;
 
+import tw.ssr.Vector;
+
 import java.awt.*;
 import java.util.ArrayList;
 
