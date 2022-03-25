@@ -69,10 +69,11 @@ public class Canvas extends JPanel {
     }
 
     public void ungroupSelected() {
-        if (singleSelect && selected.get(0).getIsGroup()) {
-            Group group = (Group) selected.get(0);
-            group.ungrouping();
-        }
+        for (Object2D obj : selected)
+            if (obj.getIsGroup()) {
+                Group group = (Group) obj;
+                group.ungrouping();
+            }
         repaint();
     }
 
