@@ -4,7 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 
 enum Mode {
-    SELECT, ASSOCIATION, GENERALIZATION_LINE, COMPOSITION_LINE, CREATE_CLASS, CREATE_USECASE
+    SELECT, ASSOCIATION_LINE, GENERALIZATION_LINE, COMPOSITION_LINE, CREATE_CLASS, CREATE_USECASE
 }
 
 public class UMLEditor {
@@ -20,7 +20,7 @@ public class UMLEditor {
     private JMenuItem renameMenuItem, groupMenuItem, ungroupMenuItem;
 
     public UMLEditor() {
-        mainFrame = new JFrame();
+        mainFrame = new JFrame("UML editor");
         btnName = new String[]{"select", "association", "generalization", "composition", "class", "use case"};
         sideBarBtns = new SideButton[btnName.length];
         canvas = new Canvas(this);
@@ -80,6 +80,10 @@ public class UMLEditor {
 
             mainFrame.add(sideBarBtns[i], sideBarConstraints);
         }
+        // 初始化時，設為select模式非null
+        mode = Mode.SELECT;
+        setOtherBtnColor();
+
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         editMenu.add(renameMenuItem);

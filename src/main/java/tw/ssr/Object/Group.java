@@ -25,6 +25,8 @@ public class Group extends Object2D {
         }
         // 算出長寬，設定長寬
         size.sub(pos);
+        pos.sub(10, 10);
+        size.add(20, 20);
         // 所有物件重設座標，基底座標是當前group的
         for (Object2D obj : children) {
             obj.pos.sub(pos);
@@ -49,13 +51,13 @@ public class Group extends Object2D {
         // 先渲染group出來
         // 設定背景為半透明
         g.setColor(new Color(64, 64, 64, 128));
-        g.fillRect(position.x - 10, position.y - 10, size.x + 20, size.y + 20);
+        g.fillRect(position.x, position.y, size.x, size.y);
         Graphics2D g2 = (Graphics2D) g;
         if (selected) {
             g2.setColor(Color.RED);
         }
         g2.setStroke(new BasicStroke(4));
-        g2.drawRect(position.x - 10, position.y - 10, size.x + 20, size.y + 20);
+        g2.drawRect(position.x, position.y, size.x, size.y);
         // 完成group的渲染，接著渲染children的
         for (Object2D child : children) {
             child.render(g);

@@ -3,6 +3,7 @@ package tw.ssr.Object;
 import tw.ssr.Vector;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 
 public class UseCaseObject extends Object2D {
     private static final int width = 120, height = 80;
@@ -13,6 +14,11 @@ public class UseCaseObject extends Object2D {
 
     public UseCaseObject(int x, int y, Object2D parent, Material mat) {
         super(x, y, width, height, parent, mat);
+        name = "Use Case Name";
+    }
+
+    public UseCaseObject(MouseEvent e, Object2D parent, Material mat) {
+        super(e, width, height, parent, mat);
         name = "Use Case Name";
     }
 

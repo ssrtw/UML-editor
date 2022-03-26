@@ -14,6 +14,11 @@ public class Vector {
         this.y = y;
     }
 
+    public Vector(double x, double y) {
+        this.x = (int) x;
+        this.y = (int) y;
+    }
+
     public Vector(MouseEvent e) {
         this.x = e.getX();
         this.y = e.getY();
@@ -70,39 +75,63 @@ public class Vector {
         return this;
     }
 
+    public Vector scale(double s) {
+        this.x *= s;
+        this.y *= s;
+        return this;
+    }
+
     public Vector abs() {
         this.x = Math.abs(x);
         this.y = Math.abs(y);
         return this;
     }
 
-    public Vector setMin(Vector other) {
+    public void setMin(Vector other) {
         setVec(Math.min(x, other.x), Math.min(y, other.y));
-        return this;
     }
 
-    public Vector setMax(Vector other) {
+    public void setMax(Vector other) {
         setVec(Math.max(x, other.x), Math.max(y, other.y));
-        return this;
     }
 
     public static Vector minPoint(Vector p, Vector q) {
-        Vector res = new Vector();
-        res.setVec(Math.min(p.x, q.x), Math.min(p.y, q.y));
+        Vector res = p.clone();
+        res.setMin(q);
+        return res;
+    }
+
+    public static Vector midPoint(Vector p, Vector q) {
+        Vector res = p.clone();
+        res.setVec((p.x + q.x) / 2, (p.y + q.y) / 2);
         return res;
     }
 
     public static Vector maxPoint(Vector p, Vector q) {
-        Vector res = new Vector();
-        res.setVec(Math.max(p.x, q.x), Math.max(p.y, q.y));
+        Vector res = p.clone();
+        res.setMax(q);
         return res;
+    }
+
+    public double distance(Vector other) {
+        return Vector.distance(this, other);
+    }
+
+    public static double distance(Vector p, Vector q) {
+        return Math.sqrt(Math.pow(p.x - q.x, 2) + Math.pow(p.y - q.y, 2));
+    }
+
+    public static Vector rotate(double theta, double ux, double uy) {
+        double vx, vy, sin, cos;
+        sin = Math.sin(theta);
+        cos = Math.cos(theta);
+        vx = cos * ux - sin * uy;
+        vy = sin * ux + cos * uy;
+        return new Vector(vx, vy);
     }
 
     @Override
     public String toString() {
-        return "Vector{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+        return "( " + x + ", " + y + ");";
     }
 }

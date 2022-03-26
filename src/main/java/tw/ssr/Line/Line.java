@@ -6,21 +6,18 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Line {
-    ArrayList<Vector> points;
+public abstract class Line {
+    protected Vector p, q;
 
     public Line() {
-        points = new ArrayList<>();
+        this.p = null;
+        this.q = null;
     }
 
-    public Line(Vector... vectors) {
-        this();
-        points.addAll(Arrays.asList(vectors));
+    public Line(Vector p, Vector q) {
+        this.p = p;
+        this.q = q;
     }
 
-    public void render(Graphics g) {
-        for (int i = 0; i < points.size() - 1; i++) {
-            g.drawLine(points.get(i).x, points.get(i).y, points.get(i + 1).x, points.get(i + 1).y);
-        }
-    }
+    public abstract void render(Graphics g);
 }

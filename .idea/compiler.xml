@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ue" />
+        <module name="UML-editor" />
       </profile>
     </annotationProcessing>
   </component>

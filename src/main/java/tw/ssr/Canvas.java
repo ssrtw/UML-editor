@@ -1,5 +1,9 @@
 package tw.ssr;
 
+import tw.ssr.Line.AssociationLine;
+import tw.ssr.Line.CompositionLine;
+import tw.ssr.Line.GeneralizationLine;
+import tw.ssr.Line.Line;
 import tw.ssr.Object.*;
 
 import javax.swing.*;
@@ -8,29 +12,38 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+enum MouseMode {
+    NONE, SINGLE_SELECT, BOX_SELECT, DRAW_LINE
+}
+
 public class Canvas extends JPanel {
     private Object2D scene;
     private UMLEditor ue;
     private ArrayList<Object2D> selected;
+    private ArrayList<Line> lines;
     private Vector startPos, currPos;
-    private boolean singleSelect;
-    private boolean isDragging;
+    // 這個屬性必須存在，否則在框選時無法確定選到一個的時候要做什麼處理
+    private MouseMode mouseMode;
 
     public Canvas() {
         super();
-        singleSelect = false;
-        isDragging = false;
-        // TODO: 先用override的，之後可能得重想這邊的繼承關係
-        // scene不應該畫出Group的邊界
-        scene = new Group() {
+        mouseMode = MouseMode.NONE;
+        // TODO: 我覺得scene是特例，因此用override，之後可能得重想這邊的繼承關係
+        scene = new Object2D() {
             @Override
             public void render(Graphics g) {
                 for (Object2D child : children) {
                     child.render(g);
                 }
             }
+
+            @Override
+            public boolean intersect(Vector mouse) {
+                return false;
+            }
         };
         selected = new ArrayList<>();
+        lines = new ArrayList<>();
         startPos = new Vector();
         currPos = new Vector();
         this.addMouseListener(new CanvasMouseAdapter(this));
@@ -44,7 +57,7 @@ public class Canvas extends JPanel {
     }
 
     public void renameSelected(String name) {
-        if (singleSelect) {
+        if (mouseMode == MouseMode.SINGLE_SELECT) {
             selected.get(0).setName(name);
             repaint();
         }
@@ -94,40 +107,18 @@ public class Canvas extends JPanel {
 
         private void clearSelected() {
             selected.clear();
-            singleSelect = false;
             for (Object2D obj : scene.getChildren()) {
                 obj.setSelect(false);
             }
         }
 
-        public void rayCasting() {
+        public Object2D rayCasting(Vector mousePos) {
             Object2D intersectObj = null;
             for (int i = scene.getChildren().size() - 1; i >= 0; i--) {
-                if (intersectObj == null && scene.getChildren().get(i).intersect(new Vector(startPos.getX(), startPos.getY()))) {
+                if (scene.getChildren().get(i).intersect(mousePos))
                     intersectObj = scene.getChildren().get(i);
-                } else {
-                    scene.getChildren().get(i).setSelect(false);
-                }
             }
-            selected.add(intersectObj);
-            if (intersectObj != null) {
-                singleSelect = true;
-                intersectObj.setSelect(true);
-            }
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            super.mouseReleased(e);
-            isDragging = false;
-            if (SwingUtilities.isLeftMouseButton(e)) {
-                if (canvas.getUe().getMode() == Mode.CREATE_CLASS) {
-                    scene.getChildren().add(new ClassObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
-                } else if (canvas.getUe().getMode() == Mode.CREATE_USECASE) {
-                    scene.getChildren().add(new UseCaseObject(e.getX(), e.getY(), scene, new Material(Color.BLACK, Color.WHITE)));
-                }
-                repaint();
-            }
+            return intersectObj;
         }
 
         @Override
@@ -135,12 +126,34 @@ public class Canvas extends JPanel {
             super.mousePressed(e);
             clearSelected();
             if (SwingUtilities.isLeftMouseButton(e)) {
-                if (canvas.getUe().getMode() == Mode.SELECT) {
-                    startPos.setVec(e);
-                    rayCasting();
-                } else {
-                    isDragging = false;
-                    singleSelect = false;
+                switch (canvas.getUe().getMode()) {
+                    case SELECT -> {
+                        startPos.setVec(e);
+                        Object2D selectedObj = rayCasting(startPos);
+                        // 如果有選到東西
+                        if (selectedObj != null) {
+                            mouseMode = MouseMode.SINGLE_SELECT;
+                            selectedObj.setSelect(true);
+                            selected.add(selectedObj);
+                        } else {
+                            // 如果沒有選到東西，代表應該會做框選
+                            mouseMode = MouseMode.BOX_SELECT;
+                            currPos.setVec(startPos);
+                        }
+                    }
+                    case ASSOCIATION_LINE, GENERALIZATION_LINE, COMPOSITION_LINE -> {
+                        startPos.setVec(e);
+                        currPos.setVec(e);
+                        Object2D selectedObj = rayCasting(startPos);
+                        if (selectedObj != null) {
+                            // 選到了物件，要開始畫線
+                            mouseMode = MouseMode.DRAW_LINE;
+                            selected.add(selectedObj);
+                        } else {
+                            // 沒有選到物件就不做事
+                            mouseMode = MouseMode.NONE;
+                        }
+                    }
                 }
                 repaint();
             }
@@ -149,49 +162,90 @@ public class Canvas extends JPanel {
         @Override
         public void mouseDragged(MouseEvent e) {
             super.mouseDragged(e);
+            currPos.setVec(e);
             if (SwingUtilities.isLeftMouseButton(e)) {
-                if (canvas.getUe().getMode() == Mode.SELECT) {
-                    if (singleSelect) {
-                        isDragging = false;
-                        int mx = e.getX() - startPos.getX();
-                        int my = e.getY() - startPos.getY();
-                        selected.get(0).move(mx, my);
+                switch (mouseMode) {
+                    case SINGLE_SELECT -> {
+                        Vector motion = currPos.sub(startPos);
+                        selected.get(0).move(motion.x, motion.y);
                         startPos.setVec(e);
-                        repaint();
-                        return;
                     }
-                    selected.clear();
-                    // 圈選
-                    isDragging = true;
-                    clearSelected();
-                    currPos.setVec(e);
-                    Vector leftTop = Vector.minPoint(startPos, currPos);
-                    Vector rightDown = Vector.maxPoint(startPos, currPos);
-                    for (Object2D obj : scene.getChildren()) {
-                        if (obj.intersect(leftTop, rightDown)) {
-                            obj.setSelect(true);
-                            selected.add(obj);
-                        } else {
-                            obj.setSelect(false);
+                    case BOX_SELECT -> {
+                        // 圈選
+                        clearSelected();
+                        Vector leftTop = Vector.minPoint(startPos, currPos);
+                        Vector rightDown = Vector.maxPoint(startPos, currPos);
+                        for (Object2D obj : scene.getChildren()) {
+                            if (obj.intersect(leftTop, rightDown)) {
+                                obj.setSelect(true);
+                                selected.add(obj);
+                            } else {
+                                obj.setSelect(false);
+                            }
                         }
                     }
-                    repaint();
                 }
+                repaint();
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            super.mouseReleased(e);
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                Mode mode = canvas.getUe().getMode();
+                if (mouseMode == MouseMode.NONE) {
+                    if (mode == Mode.CREATE_CLASS) {
+                        scene.getChildren().add(new ClassObject(e, scene, new Material(Color.BLACK, Color.WHITE)));
+                    } else if (mode == Mode.CREATE_USECASE) {
+                        scene.getChildren().add(new UseCaseObject(e, scene, new Material(Color.BLACK, Color.WHITE)));
+                    }
+                } else if (mouseMode == MouseMode.DRAW_LINE) {
+                    Vector currPos = new Vector(e);
+                    // 拿第一個物件
+                    if (selected.size() == 1 && !selected.get(0).getIsGroup()) {
+                        Object2D firstObj = selected.get(0);
+                        Object2D secondObj = rayCasting(currPos);
+                        // 如果其中一個是group的話就不該被連線，並且第二個物件不該是null
+                        if (secondObj != null && !secondObj.getIsGroup()) {
+                            Vector firstNearPort = firstObj.getNearPort(startPos);
+                            Vector secondNearPort = secondObj.getNearPort(currPos);
+                            switch (mode) {
+                                case ASSOCIATION_LINE -> lines.add(new AssociationLine(firstNearPort, secondNearPort));
+                                case GENERALIZATION_LINE -> lines.add(new GeneralizationLine(firstNearPort, secondNearPort));
+                                case COMPOSITION_LINE -> lines.add(new CompositionLine(firstNearPort, secondNearPort));
+                            }
+                        }
+                    }
+                }
+                mouseMode = MouseMode.NONE;
+                startPos.setVec(0, 0);
+                currPos.setVec(0, 0);
+                repaint();
             }
         }
     }
 
     // https://www.itread01.com/content/1548889398.html
-    // 應該用paintComponets，但是我覺得好像畫就好，我自己有z-index。(目前先做Array順序就好)
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         scene.render(g);
-        if (isDragging) {
-            Vector leftTop = Vector.minPoint(startPos, currPos);
-            Vector size = startPos.clone().sub(currPos).abs();
-            g.setColor(new Color(0, 128, 192, 128));
-            g.fillRect(leftTop.getX(), leftTop.getY(), size.getX(), size.getY());
+        for (Line line : lines) {
+            line.render(g);
+        }
+        switch (mouseMode) {
+            case BOX_SELECT -> {
+                Vector leftTop = Vector.minPoint(startPos, currPos);
+                Vector size = startPos.clone().sub(currPos).abs();
+                g.setColor(new Color(0, 128, 192, 128));
+                g.fillRect(leftTop.getX(), leftTop.getY(), size.getX(), size.getY());
+            }
+            case DRAW_LINE -> {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setStroke(new BasicStroke(3));
+                g2.drawLine(startPos.x, startPos.y, currPos.x, currPos.y);
+            }
         }
     }
 }

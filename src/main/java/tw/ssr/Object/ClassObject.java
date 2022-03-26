@@ -3,6 +3,7 @@ package tw.ssr.Object;
 import tw.ssr.Vector;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 
 public class ClassObject extends Object2D {
     private static final int width = 100, height = 150;
@@ -13,6 +14,11 @@ public class ClassObject extends Object2D {
 
     public ClassObject(int x, int y, Object2D parent, Material mat) {
         super(x, y, width, height, parent, mat);
+        name = "Class Name";
+    }
+
+    public ClassObject(MouseEvent e, Object2D parent, Material mat) {
+        super(e, width, height, parent, mat);
         name = "Class Name";
     }
 
