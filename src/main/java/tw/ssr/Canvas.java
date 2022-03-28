@@ -57,7 +57,7 @@ public class Canvas extends JPanel {
     }
 
     public void renameSelected(String name) {
-        if (mouseMode == MouseMode.SINGLE_SELECT) {
+        if (selected.size() == 1 && !selected.get(0).getIsGroup()) {
             selected.get(0).setName(name);
             repaint();
         }
