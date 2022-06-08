@@ -1,12 +1,13 @@
 package tw.ssr.Object;
 
 import tw.ssr.Vector;
+import tw.ssr.IRenderObj;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-abstract public class Object2D {
+abstract public class Object2D implements IRenderObj {
     protected static int portCnt = 4;
     protected static int zIndexNxt = 0;
     protected int zIndex;
@@ -14,9 +15,10 @@ abstract public class Object2D {
     protected Vector size;
     protected Material mat;
     protected String name;
-    /* Todo: 目前把ports的位置用世界座標儲存
-        可能有必要重新設計?
-    */
+    /*
+     * Todo: 目前把ports的位置用世界座標儲存
+     * 可能有必要重新設計?
+     */
     protected Vector ports[];
     protected Object2D parent;
     protected boolean selected;

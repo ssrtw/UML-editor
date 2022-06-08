@@ -3,16 +3,14 @@ package tw.ssr;
 import java.awt.*;
 import javax.swing.*;
 
-enum Mode {
-    SELECT, ASSOCIATION_LINE, GENERALIZATION_LINE, COMPOSITION_LINE, CREATE_CLASS, CREATE_USECASE
-}
-
 public class UMLEditor {
     private static int minWidth = 1000, minHeight = 800;
     private JFrame mainFrame;
     private String[] btnName;
     private SideButton[] sideBarBtns;
-    private Canvas canvas;
+    private CanvasView view;
+    private CanvasModel model;
+    private CanvasController controller;
     private Mode mode;
     private JMenuBar menuBar;
     private JMenu fileMenu;
@@ -21,9 +19,15 @@ public class UMLEditor {
 
     public UMLEditor() {
         mainFrame = new JFrame("UML editor");
-        btnName = new String[]{"select", "association", "generalization", "composition", "class", "use case"};
+        btnName = new String[] { "select", "association", "generalization", "composition", "class", "use case" };
         sideBarBtns = new SideButton[btnName.length];
-        canvas = new Canvas(this);
+        view = new CanvasView();
+        model = new CanvasModel();
+        controller = new CanvasController();
+        view.setController(controller);
+        controller.setUMLEditor(this);
+        controller.setView(view);
+        controller.setModel(model);
 
         for (int i = 0; i < btnName.length; i++)
             sideBarBtns[i] = new SideButton(btnName[i], Mode.values()[i], this);
@@ -40,8 +44,8 @@ public class UMLEditor {
         return mainFrame;
     }
 
-    public JPanel getCanvas() {
-        return canvas;
+    public JPanel getView() {
+        return view;
     }
 
     public Mode getMode() {
@@ -67,7 +71,7 @@ public class UMLEditor {
         panelConstraints.weighty = 1;
         panelConstraints.fill = GridBagConstraints.BOTH;
 
-        mainFrame.add(canvas, panelConstraints);
+        mainFrame.add(view, panelConstraints);
 
         GridBagConstraints sideBarConstraints = new GridBagConstraints();
         for (int i = 0; i < btnName.length; i++) {
@@ -88,19 +92,20 @@ public class UMLEditor {
         menuBar.add(editMenu);
         editMenu.add(renameMenuItem);
         renameMenuItem.addActionListener(e -> {
-            if (canvas.getSelected().size() == 1) {
-                String newName = JOptionPane.showInputDialog(mainFrame, "Input new name", "Rename", JOptionPane.INFORMATION_MESSAGE);
+            if (controller.getSelected().size() == 1) {
+                String newName = JOptionPane.showInputDialog(mainFrame, "Input new name", "Rename",
+                        JOptionPane.INFORMATION_MESSAGE);
                 if (newName != null)
-                    canvas.renameSelected(newName);
+                    controller.renameSelected(newName);
             }
         });
         editMenu.add(groupMenuItem);
         groupMenuItem.addActionListener(e -> {
-            canvas.groupSelected();
+            controller.groupSelected();
         });
         editMenu.add(ungroupMenuItem);
         ungroupMenuItem.addActionListener(e -> {
-            canvas.ungroupSelected();
+            controller.ungroupSelected();
         });
         mainFrame.setJMenuBar(menuBar);
 

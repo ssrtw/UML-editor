@@ -1,12 +1,9 @@
 package tw.ssr.Line;
 
+import tw.ssr.IRenderObj;
 import tw.ssr.Vector;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-public abstract class Line {
+public abstract class Line implements IRenderObj {
     protected Vector p, q;
 
     public Line() {
@@ -18,6 +15,4 @@ public abstract class Line {
         this.p = p;
         this.q = q;
     }
-
-    public abstract void render(Graphics g);
 }

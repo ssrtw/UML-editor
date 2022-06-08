@@ -3,8 +3,6 @@ package tw.ssr.Line;
 import tw.ssr.Vector;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AssociationLine extends Line {
 

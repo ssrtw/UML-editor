@@ -7,13 +7,13 @@ import java.awt.event.MouseEvent;
 
 public class SideButton extends JButton {
     private Mode mode;
-    private UMLEditor ue;
+    UMLEditor ue;
 
     public SideButton(String text) {
         super(text);
         this.setBackground(Color.LIGHT_GRAY);
         this.setForeground(Color.BLACK);
-        this.addMouseListener(new SideButtonMouseAdapter());
+        this.addMouseListener(new SideButtonMouseAdapter(this));
         ImageIcon ii = new ImageIcon("src/main/resources/" + text + ".png");
         Image img = ii.getImage();
         Image resizeImg = img.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
@@ -46,19 +46,26 @@ public class SideButton extends JButton {
             setForeground(Color.BLACK);
         }
     }
+}
 
-    class SideButtonMouseAdapter extends MouseAdapter {
-        public SideButtonMouseAdapter() {
-            super();
-        }
+class SideButtonMouseAdapter extends MouseAdapter {
+    private SideButton sb;
 
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            super.mouseClicked(e);
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                ue.setMode(mode);
-                ue.setOtherBtnColor();
-            }
+    public SideButtonMouseAdapter() {
+        super();
+    }
+
+    public SideButtonMouseAdapter(SideButton sb) {
+        super();
+        this.sb=sb;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        super.mouseClicked(e);
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            sb.ue.setMode(sb.getMode());
+            sb.ue.setOtherBtnColor();
         }
     }
 }
